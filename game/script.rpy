@@ -8,6 +8,8 @@ define t = Character("???")
 default feedChoice = False
 
 image DuckSnake animated:
+    nearest True
+    zoom 10
     "DuckSnake/no1.png"
     pause 0.75
     "DuckSnake/no2.png"
@@ -30,6 +32,9 @@ label start:
     
     show DuckSnake animated at truecenter
 
+    jump mainLoop
+
+label mainLoop:
     t "I'm hungry!!!"
 
     menu:
@@ -49,6 +54,5 @@ label start:
         "Instead of apologizing, I find it helpful to say 'thank you'"
 
     # This ends the game.
-    $renpy.quit()
 
-    return
+    jump mainLoop
