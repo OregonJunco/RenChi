@@ -47,6 +47,9 @@ label start:
 
     play music "audio/DesertAmbience.ogg"
 
+    if secSinceLastVisit > 60:
+        t "Oh wow, you again? It's been a minute."
+
     t "I'm hungry"
     
     show DuckSnake animated at truecenter
