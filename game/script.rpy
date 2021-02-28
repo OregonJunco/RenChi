@@ -16,17 +16,36 @@ image DuckSnake animated:
     pause 0.75
     repeat
 
+
+# Skip the main menu and jump straight to the creature's greeting
 label main_menu:
     return
 
-# The game starts here.
+init python:
+    # Calculate how long it's been since I last visited the creature
+    from datetime import datetime
+    def getSecondsFromDateTime(dt):
+        return ((dt - datetime(1970, 1, 1)).total_seconds())
+
+    now = datetime.now()
+    if persistent.originalVisitTimestamp is None:
+        print("Initializing first timestamp")
+        persistent.originalVisitTimestamp = now
+        persistent.lastVisitTimestamp = now
+    
+    secSinceFirstVisit = (now - persistent.originalVisitTimestamp).total_seconds()
+    secSinceLastVisit = (now - persistent.lastVisitTimestamp).total_seconds()
+    print("Last lastVisitTimestamp =", persistent.lastVisitTimestamp)
+    persistent.lastVisitTimestamp = now
+    print("now =", now)
+    print("Current Time =", now.strftime("%H:%M:%S"))
+    print("Time since first launch =", secSinceFirstVisit)
+    print("Time since last launch =", secSinceLastVisit)
 
 label start:
     scene bg room
 
     play music "audio/DesertAmbience.ogg"
-
-    # These display lines of dialogue.
 
     t "I'm hungry"
     
@@ -53,6 +72,9 @@ label mainLoop:
     else:
         "Instead of apologizing, I find it helpful to say 'thank you'"
 
-    # This ends the game.
-
     jump mainLoop
+
+# label quit:
+#     "This menu will now autosave"
+#     $ renpy.save(slotname)
+#     return
