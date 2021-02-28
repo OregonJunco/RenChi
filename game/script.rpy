@@ -24,19 +24,20 @@ label main_menu:
 init python:
     # Calculate how long it's been since I last visited the creature
     from datetime import datetime
+    p = persistent
     def getSecondsFromDateTime(dt):
         return ((dt - datetime(1970, 1, 1)).total_seconds())
 
     now = datetime.now()
-    if persistent.originalVisitTimestamp is None:
+    if p.originalVisitTimestamp is None:
         print("Initializing first timestamp")
-        persistent.originalVisitTimestamp = now
-        persistent.lastVisitTimestamp = now
+        p.originalVisitTimestamp = now
+        p.lastVisitTimestamp = now
     
-    secSinceFirstVisit = (now - persistent.originalVisitTimestamp).total_seconds()
-    secSinceLastVisit = (now - persistent.lastVisitTimestamp).total_seconds()
-    print("Last lastVisitTimestamp =", persistent.lastVisitTimestamp)
-    persistent.lastVisitTimestamp = now
+    secSinceFirstVisit = (now - p.originalVisitTimestamp).total_seconds()
+    secSinceLastVisit = (now - p.lastVisitTimestamp).total_seconds()
+    print("Last lastVisitTimestamp =", p.lastVisitTimestamp)
+    p.lastVisitTimestamp = now
     print("now =", now)
     print("Current Time =", now.strftime("%H:%M:%S"))
     print("Time since first launch =", secSinceFirstVisit)
