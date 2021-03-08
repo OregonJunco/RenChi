@@ -7,6 +7,15 @@ define t = Character("???")
 
 default feedChoice = False
 
+image BabySnake animated:
+    nearest True
+    zoom 10
+    "BabySnake/no1.png"
+    pause 0.75
+    "BabySnake/no2.png"
+    pause 0.75
+    repeat
+
 image DuckSnake animated:
     nearest True
     zoom 10
@@ -49,7 +58,7 @@ label start:
     play music "audio/DesertAmbience.ogg"
 
     if secSinceLastVisit > 60:
-        t "Oh wow, you again? It's been a minute."
+        t "Oh wow, you again? It's been a minute. Precisely, [p.originalVisitTimestamp]"
 
     t "I'm hungry"
     
