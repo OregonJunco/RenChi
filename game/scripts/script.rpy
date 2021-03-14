@@ -29,6 +29,11 @@ image DuckSnake animated:
 label main_menu:
     return
 
+init python:
+    # Infer time passing
+    hungerDelta = secSinceLastVisit / 10
+    p.satiation = max(p.satiation - hungerDelta, 0)
+    print("Satiation atrophied by ", hungerDelta, " satiation, satiation is now ", p.satiation)
 
 label start:
     show screen healthbar
@@ -43,33 +48,42 @@ label start:
 
     play music "audio/DesertAmbience.ogg"
 
-    if secSinceLastVisit > 60:
-        t "Oh wow, you again? It's been a minute. Precisely, [p.originalVisitTimestamp]"
-
-    t "I'm hungry"
     
     show DuckSnake animated at truecenter
 
+    jump introGreeting
+
+label introGreeting:
+    # Remark on time passed since last visit:
+    if secSinceLastVisit > 30:
+        t "Oh wow, you again? It's been a minute. Precisely, [secSinceLastVisit] seconds"
+    # Remark on stats:
+    if p.satiation <= 10:
+        t "Where the hell were you?? I'm starving!"
+    elif p.satiation <= 50:
+        t "Thank god you're here!"
+    # No other remark, just say something random
+    else:
+        $ possibleWelcomes = ["Nice to see you again", "You again!", "Ayyyyy, there's my favorite human", "What's up motafuckas guess who's in the HOUSE"]
+        $ welcome = renpy.random.choice(possibleWelcomes)
+        t "[welcome]"
     jump mainLoop
 
 label mainLoop:
-    t "I'm hungry!!!"
-
     menu:
         "Feed the creature":
+            $ p.satiation = min(p.satiation + 20, 100)
             t "Thank you for feeding me"
             t "Such is the fate of all creatures, to suck nutrients from the earth until the earth reclaims them"
-            $ feedChoice = True
+            if p.satiation < 100:
+                t "Still feeling a little peckish tho tbh"
+            else:
+                t "I'm feeling all fed up! Which is to say, very satisfied"
         "Apologize":
             t "You apologize too much"
             t "It's strange, I asked for help, and you apologized. Why the guilt?"
-            $ feedChoice = False
 
     "As above, so below"
-    if feedChoice:
-        "Remember that time you fed me?"
-    else:
-        "Instead of apologizing, I find it helpful to say 'thank you'"
 
     jump mainLoop
 

@@ -65,7 +65,3 @@ init -10 python:
     print("Time since first launch =", secSinceOriginalVisit)
     print("Time since last launch =", secSinceLastVisit)
 
-    hungerDelta = secSinceLastVisit / 10
-    p.satiation -= hungerDelta
-    print("Satiation atrophied by ", hungerDelta, " satiation, satiation is now ", p.satiation)
-
