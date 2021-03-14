@@ -34,6 +34,10 @@ image poop:
     pause 0.75
     repeat
 
+transform poopPos:
+    xpos 900
+    yalign 0.6
+
 
 # Skip the main menu and jump straight to the creature's greeting
 label main_menu:
@@ -45,10 +49,18 @@ init -11 python:
 
     def applyDefaults():
         p.satiation = 100
+        p.hasPoop = False
         updatePoopStamp()
 
-    # def setPoop(hasPoop):
-    #     renpy.show("poop")
+    def setPoop(hasPoop):
+        if hasPoop:
+            renpy.show(name="poop", at_list=[poopPos()])
+            p.nextPoopTs = datetime.max
+            p.hasPoop = True
+        else:
+            updatePoopStamp()
+            renpy.hide("poop")
+            p.hasPoop = False
 
 init python:
     # Infer time passing
@@ -69,22 +81,20 @@ label start:
 
     play music "audio/DesertAmbience.ogg"
 
+    if (p.hasPoop):
+        $ setPoop(True)
     
     show DuckSnake animated at truecenter
 
     jump introGreeting
-
-transform poopPos:
-    xalign 1
 
 label introGreeting:
     # Remark on time passed since last visit:
     if secSinceLastVisit > 30:
         t "Oh wow, you again? It's been a minute. Precisely, [secSinceLastVisit] seconds"
     if (now > p.nextPoopTs):
+        $ setPoop(True)
         t "Guess what I pooped???"
-        $ updatePoopStamp()
-        show poop at poopPos
     # Remark on stats:
     if p.satiation <= 10:
         t "Where the hell were you?? I'm starving!"
@@ -110,6 +120,9 @@ label mainLoop:
         "Apologize":
             t "You apologize too much"
             t "It's strange, I asked for help, and you apologized. Why the guilt?"
+        "Clean up poop" if p.hasPoop:
+            $ setPoop (False)
+            t "Thanks!! God that was gross"
 
     "As above, so below"
 
