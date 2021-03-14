@@ -1,10 +1,10 @@
 # Derived time variables
-default secSinceOriginalVisit = 0
-default secSinceLastVisit = 0
-default tdFromOriginal = None
-default tdFromLast = None
-## Possible values: Morning, Afternoon, Evening, Night
-default timeOfDay = ""
+# default secSinceOriginalVisit = 0
+# default secSinceLastVisit = 0
+# default tdFromOriginal = None
+# default tdFromLast = None
+# ## Possible values: Morning, Afternoon, Evening, Night
+# default timeOfDay = ""
 
 # Imports & Convenience Definitions
 init -30 python:
