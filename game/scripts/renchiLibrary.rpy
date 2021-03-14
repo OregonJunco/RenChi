@@ -51,7 +51,7 @@ init -10 python:
         print("Initializing first timestamp")
         p.originalVisitTimestamp = now
         p.lastVisitTimestamp = now
-        p.satiation = 100
+        applyDefaults()
 
     tdFromOriginal = (now - p.originalVisitTimestamp)
     tdFromLast = (now - p.lastVisitTimestamp)

@@ -29,6 +29,10 @@ image DuckSnake animated:
 label main_menu:
     return
 
+init -11 python:
+    def applyDefaults():
+        p.satiation = 100
+
 init python:
     # Infer time passing
     hungerDelta = secSinceLastVisit / 10
