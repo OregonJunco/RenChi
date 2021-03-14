@@ -1515,13 +1515,15 @@ style slider_pref_slider:
 
 ## CUSTOM ROBIN SCREENS:
 screen healthbar():
-    # hbox:
-    # align (1.0, 0)
-    # spacing 0
-    bar:
-        xsize 200 
+    fixed:
+        xalign 0.99999 # HACK: xalign 1 seems to be the same as xalign 0? whatever
+        yalign 1
+        xsize 200
         ysize 25
-        value p.satiation
-        range 100
-    $ roundedSatiation = int(p.satiation)
-    text "Hunger [roundedSatiation]" xalign 0
+        bar:
+            xsize 200 
+            ysize 25
+            value p.satiation
+            range 100
+        $ roundedSatiation = int(p.satiation)
+        text "Hunger [roundedSatiation]"
