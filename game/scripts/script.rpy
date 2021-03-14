@@ -110,13 +110,16 @@ label introGreeting:
 label mainLoop:
     menu:
         "Feed the creature":
-            $ p.satiation = min(p.satiation + 20, 100)
-            t "Thank you for feeding me"
-            t "Such is the fate of all creatures, to suck nutrients from the earth until the earth reclaims them"
-            if p.satiation < 100:
-                t "Still feeling a little peckish tho tbh"
+            if (p.satiation < 100):
+                $ p.satiation = min(p.satiation + 20, 100)
+                t "Thank you for feeding me"
+                t "Such is the fate of all creatures, to suck nutrients from the earth until the earth reclaims them"
+                if p.satiation < 100:
+                    t "Still feeling a little peckish tho tbh"
+                else:
+                    t "I'm feeling all fed up! Which is to say, very satisfied"
             else:
-                t "I'm feeling all fed up! Which is to say, very satisfied"
+                t "I appreciate that, but I'm actually quite full. Thanks though!"
         "Apologize":
             t "You apologize too much"
             t "It's strange, I asked for help, and you apologized. Why the guilt?"
