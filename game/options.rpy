@@ -207,3 +207,7 @@ init python:
 ## by a slash.
 
 # define build.itch_project = "renpytom/test-project"
+
+
+## Robin Overrides:
+define config.quit_action = Quit(confirm=False)
