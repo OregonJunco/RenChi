@@ -99,7 +99,7 @@ label introGreeting:
     if p.satiation <= 10:
         t "Where the hell were you?? I'm starving!"
     elif p.satiation <= 50:
-        t "Yoooo just in the nick of time, I've been starving"
+        t "Yoooo just in the nick of time, I've started to get a little hungry"
     # No other remark, just say something random
     else:
         $ possibleWelcomes = ["Nice to see you again", "You again!", "Ayyyyy, there's my favorite human", "What's up motafuckas guess who's in the HOUSE"]
