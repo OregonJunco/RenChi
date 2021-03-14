@@ -15,12 +15,15 @@ image BabySnake animated:
     pause 0.75
     repeat
 
-image DuckSnake animated:
+# default bodySprite1 = "DuckSnake/no1.png"
+# default bodySprite2 = "DuckSnake/no2.png"
+
+image DuckSnake animated:# = DynamicImage(p.bodySprite1)
     nearest True
     zoom 10
-    "DuckSnake/no1.png"
+    p.bodySprite1
     pause 0.75
-    "DuckSnake/no2.png"
+    p.bodySprite2
     pause 0.75
     repeat
 
@@ -61,12 +64,49 @@ init -11 python:
             updatePoopStamp()
             renpy.hide("poop")
             p.hasPoop = False
+    def getSprite():
+        return p.bodySprite1
 
 init python:
+    # Character API:
+    firstShowSkipFlag = True
+    def setSprite(sprite):
+        if sprite == "Default":
+            p.bodySprite1 = "DuckSnake/no1.png"
+            p.bodySprite2 = "DuckSnake/no2.png"
+        elif sprite == "Hungry":
+            p.bodySprite1 = "DuckSnake/drool1.png"
+            p.bodySprite2 = "DuckSnake/drool2.png"
+        elif sprite == "Eating":
+            p.bodySprite1 = "DuckSnake/lick1.png"
+            p.bodySprite2 = "DuckSnake/lick2.png"
+        elif sprite == "Sad":
+            p.bodySprite1 = "DuckSnake/sad1.png"
+            p.bodySprite2 = "DuckSnake/sad2.png"
+        elif sprite == "Happy":
+            p.bodySprite1 = "DuckSnake/happy1.png"
+            p.bodySprite2 = "DuckSnake/happy2.png"
+        global firstShowSkipFlag
+        if not firstShowSkipFlag:
+            renpy.show("DuckSnake animated")
+        else:
+            firstShowSkipFlag = False
+
+    def updateSpriteByState():
+        if p.satiation < 10:
+            setSprite("Sad")
+        elif p.satiation < 50:
+            setSprite("Hungry")
+        else:
+            setSprite("Default")
+
+
     # Infer time passing
     hungerDelta = secSinceLastVisit / 10
     p.satiation = max(p.satiation - hungerDelta, 0)
     print("Satiation atrophied by ", hungerDelta, " satiation, satiation is now ", p.satiation)
+    updateSpriteByState()
+
 
 label start:
     show screen healthbar
@@ -112,12 +152,15 @@ label mainLoop:
         "Feed the creature":
             if (p.satiation < 100):
                 $ p.satiation = min(p.satiation + 20, 100)
+                $ setSprite("Eating")
                 t "Thank you for feeding me"
                 t "Such is the fate of all creatures, to suck nutrients from the earth until the earth reclaims them"
+                $ setSprite("Happy")
                 if p.satiation < 100:
                     t "Still feeling a little peckish tho tbh"
                 else:
                     t "I'm feeling all fed up! Which is to say, very satisfied"
+                $ updateSpriteByState()
             else:
                 t "I appreciate that, but I'm actually quite full. Thanks though!"
         "Apologize":
@@ -125,7 +168,9 @@ label mainLoop:
             t "It's strange, I asked for help, and you apologized. Why the guilt?"
         "Clean up poop" if p.hasPoop:
             $ setPoop (False)
+            $ setSprite("Happy")
             t "Thanks!! God that was gross"
+            $ updateSpriteByState()
 
     "As above, so below"
 
