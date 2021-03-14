@@ -17,12 +17,13 @@ init -30 python:
 init -20 python:
     def getSecondsFromDateTime(dt):
         return ((dt - datetime(1970, 1, 1)).total_seconds())
-    def getHoursSinceFirstVisit():
-        return secSinceOriginalVisit
-    def getDateHour(time = now.time()):
-        return time.hour
+    # In hours.... TODO comment bitch
+    def getHoursKnown():
+        return ((dt - p.originalVisitTimestamp).total_hours)
     def getDaysKnown(dt = now):
         return ((dt - p.originalVisitTimestamp).days)
+    def getDateHour(time = now.time()):
+        return time.hour
     def getTimeOfDay(time = now.time()):
         hour = time.hour
         if hour >= 6 and hour <= 11:
@@ -50,6 +51,7 @@ init -10 python:
         print("Initializing first timestamp")
         p.originalVisitTimestamp = now
         p.lastVisitTimestamp = now
+        p.satiation = 100
 
     tdFromOriginal = (now - p.originalVisitTimestamp)
     tdFromLast = (now - p.lastVisitTimestamp)
@@ -62,4 +64,8 @@ init -10 python:
     print("Current Time =", now.strftime("%H:%M:%S"))
     print("Time since first launch =", secSinceOriginalVisit)
     print("Time since last launch =", secSinceLastVisit)
+
+    hungerDelta = secSinceLastVisit / 10
+    p.satiation -= hungerDelta
+    print("Satiation atrophied by ", hungerDelta, " satiation, satiation is now ", p.satiation)
 

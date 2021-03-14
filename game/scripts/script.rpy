@@ -1,10 +1,9 @@
-# The script of the game goes in this file.
+﻿# The script of the game goes in this file.
 
 # Declare characters used by this game. The color argument colorizes the
 # name of the character.
 
 define t = Character("???")
-
 default feedChoice = False
 
 image BabySnake animated:
@@ -32,6 +31,7 @@ label main_menu:
 
 
 label start:
+    show screen healthbar
     scene bg room
 
     play music "audio/DesertAmbience.ogg"
