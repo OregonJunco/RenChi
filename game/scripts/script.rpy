@@ -32,7 +32,14 @@ label main_menu:
 
 label start:
     show screen healthbar
-    scene bg room
+    if getTimeOfDay() == "Morning":
+        scene bg morning
+    elif getTimeOfDay() == "Afternoon":
+        scene bg afternoon
+    elif getTimeOfDay() == "Evening":
+        scene bg evening
+    elif getTimeOfDay() == "Night":
+        scene bg night
 
     play music "audio/DesertAmbience.ogg"
 
