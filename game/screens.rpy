@@ -1514,16 +1514,22 @@ style slider_pref_slider:
     xsize 600
 
 ## CUSTOM ROBIN SCREENS:
+default hbSize = 400
+default hbHeight = 40
 screen healthbar():
     fixed:
-        xalign 0.99999 # HACK: xalign 1 seems to be the same as xalign 0? whatever
-        yalign 1
-        xsize 200
-        ysize 25
-        bar:
-            xsize 200 
-            ysize 25
-            value p.satiation
-            range 100
-        $ roundedSatiation = int(p.satiation)
-        text "Hunger [roundedSatiation]"
+        xpos 1280 - hbSize
+        vbox:
+            fixed:
+                xsize hbSize
+                ysize hbHeight
+                bar:
+                    xsize hbSize 
+                    ysize hbHeight
+                    value p.satiation
+                    range 100
+                $ roundedSatiation = int(p.satiation)
+                text "Hunger [roundedSatiation]" yalign 0.5
+            $ timeDisplayStr = now.strftime("%H:%M")
+            $ tod = getTimeOfDay()
+            text "[timeDisplayStr] ([tod])"
