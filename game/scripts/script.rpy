@@ -24,14 +24,31 @@ image DuckSnake animated:
     pause 0.75
     repeat
 
+image poop:
+    nearest True
+    xzoom 20
+    yzoom 20
+    "Objects/obj poop.png"
+    pause 0.75
+    xzoom -20
+    pause 0.75
+    repeat
+
 
 # Skip the main menu and jump straight to the creature's greeting
 label main_menu:
     return
 
 init -11 python:
+    def updatePoopStamp():
+        p.nextPoopTs = now + timedelta(minutes = 1)
+
     def applyDefaults():
         p.satiation = 100
+        updatePoopStamp()
+
+    # def setPoop(hasPoop):
+    #     renpy.show("poop")
 
 init python:
     # Infer time passing
@@ -57,15 +74,22 @@ label start:
 
     jump introGreeting
 
+transform poopPos:
+    xalign 1
+
 label introGreeting:
     # Remark on time passed since last visit:
     if secSinceLastVisit > 30:
         t "Oh wow, you again? It's been a minute. Precisely, [secSinceLastVisit] seconds"
+    if (now > p.nextPoopTs):
+        t "Guess what I pooped???"
+        $ updatePoopStamp()
+        show poop at poopPos
     # Remark on stats:
     if p.satiation <= 10:
         t "Where the hell were you?? I'm starving!"
     elif p.satiation <= 50:
-        t "Thank god you're here!"
+        t "Yoooo just in the nick of time, I've been starving"
     # No other remark, just say something random
     else:
         $ possibleWelcomes = ["Nice to see you again", "You again!", "Ayyyyy, there's my favorite human", "What's up motafuckas guess who's in the HOUSE"]
@@ -90,8 +114,3 @@ label mainLoop:
     "As above, so below"
 
     jump mainLoop
-
-# label quit:
-#     "This menu will now autosave"
-#     $ renpy.save(slotname)
-#     return
