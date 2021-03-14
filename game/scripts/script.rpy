@@ -15,15 +15,15 @@ image BabySnake animated:
     pause 0.75
     repeat
 
-# default bodySprite1 = "DuckSnake/no1.png"
-# default bodySprite2 = "DuckSnake/no2.png"
+default bodySprite1 = "DuckSnake/no1.png"
+default bodySprite2 = "DuckSnake/no2.png"
 
-image DuckSnake animated:# = DynamicImage(p.bodySprite1)
+image DuckSnake animated:# = DynamicImage(bodySprite1)
     nearest True
     zoom 10
-    p.bodySprite1
+    bodySprite1
     pause 0.75
-    p.bodySprite2
+    bodySprite2
     pause 0.75
     repeat
 
@@ -65,27 +65,29 @@ init -11 python:
             renpy.hide("poop")
             p.hasPoop = False
     def getSprite():
-        return p.bodySprite1
+        return bodySprite1
 
 init python:
     # Character API:
     firstShowSkipFlag = True
     def setSprite(sprite):
+        global bodySprite1
+        global bodySprite2
         if sprite == "Default":
-            p.bodySprite1 = "DuckSnake/no1.png"
-            p.bodySprite2 = "DuckSnake/no2.png"
+            bodySprite1 = "DuckSnake/no1.png"
+            bodySprite2 = "DuckSnake/no2.png"
         elif sprite == "Hungry":
-            p.bodySprite1 = "DuckSnake/drool1.png"
-            p.bodySprite2 = "DuckSnake/drool2.png"
+            bodySprite1 = "DuckSnake/drool1.png"
+            bodySprite2 = "DuckSnake/drool2.png"
         elif sprite == "Eating":
-            p.bodySprite1 = "DuckSnake/lick1.png"
-            p.bodySprite2 = "DuckSnake/lick2.png"
+            bodySprite1 = "DuckSnake/lick1.png"
+            bodySprite2 = "DuckSnake/lick2.png"
         elif sprite == "Sad":
-            p.bodySprite1 = "DuckSnake/sad1.png"
-            p.bodySprite2 = "DuckSnake/sad2.png"
+            bodySprite1 = "DuckSnake/sad1.png"
+            bodySprite2 = "DuckSnake/sad2.png"
         elif sprite == "Happy":
-            p.bodySprite1 = "DuckSnake/happy1.png"
-            p.bodySprite2 = "DuckSnake/happy2.png"
+            bodySprite1 = "DuckSnake/happy1.png"
+            bodySprite2 = "DuckSnake/happy2.png"
         global firstShowSkipFlag
         if not firstShowSkipFlag:
             renpy.show("DuckSnake animated")
