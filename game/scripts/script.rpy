@@ -18,7 +18,7 @@ image BabySnake animated:
 default bodySprite1 = "DuckSnake/no1.png"
 default bodySprite2 = "DuckSnake/no2.png"
 
-image DuckSnake animated:# = DynamicImage(bodySprite1)
+image DuckSnake animated:
     nearest True
     zoom 10
     bodySprite1
@@ -40,11 +40,6 @@ image poop:
 transform poopPos:
     xpos 900
     yalign 0.6
-
-
-# Skip the main menu and jump straight to the creature's greeting
-label main_menu:
-    return
 
 init -11 python:
     def updatePoopStamp():
@@ -102,12 +97,10 @@ init python:
         else:
             setSprite("Default")
 
-
-    # Infer time passing
+    # Execute time passage consequences
     hungerDelta = secSinceLastVisit / 10
     p.satiation = max(p.satiation - hungerDelta, 0)
     print("Satiation atrophied by ", hungerDelta, " satiation, satiation is now ", p.satiation)
-    updateSpriteByState()
 
 
 label start:
@@ -123,19 +116,25 @@ label start:
 
     play music "audio/DesertAmbience.ogg"
 
-    if (p.hasPoop):
-        $ setPoop(True)
-    
+    # Load any existing poop
+    python:
+        if p.hasPoop:
+            setPoop(True)
+        elif now > p.nextPoopTs:
+            setPoop(True)
+            hasNewPoop = True
+        updateSpriteByState()
     show DuckSnake animated at truecenter
 
     jump introGreeting
 
+default hasNewPoop = False
 label introGreeting:
     # Remark on time passed since last visit:
     if secSinceLastVisit > 30:
         t "Oh wow, you again? It's been a minute. Precisely, [secSinceLastVisit] seconds"
-    if (now > p.nextPoopTs):
-        $ setPoop(True)
+    if hasNewPoop:
+        $ hasNewPoop = False
         t "Guess what I pooped???"
     # Remark on stats:
     if p.satiation <= 10:
@@ -144,7 +143,7 @@ label introGreeting:
         t "Yoooo just in the nick of time, I've started to get a little hungry"
     # No other remark, just say something random
     else:
-        $ possibleWelcomes = ["Nice to see you again", "You again!", "Ayyyyy, there's my favorite human", "What's up motafuckas guess who's in the HOUSE"]
+        $ possibleWelcomes = ["Nice to see you again", "You again!", "Ayyyyy, there's my favorite human", "What's up mothafuckas guess who's in the HOUSE"]
         $ welcome = renpy.random.choice(possibleWelcomes)
         t "[welcome]"
     jump mainLoop
