@@ -12,7 +12,6 @@ init -30 python:
     from datetime import timedelta
 
     now = datetime.now()
-    p = persistent
 
 # Library Functions
 init -20 python:
@@ -20,9 +19,9 @@ init -20 python:
         return ((dt - datetime(1970, 1, 1)).total_seconds())
     # In hours.... TODO comment bitch
     def getHoursKnown():
-        return ((dt - p.originalVisitTimestamp).total_hours)
+        return ((dt - persistent.originalVisitTimestamp).total_hours)
     def getDaysKnown(dt = now):
-        return ((dt - p.originalVisitTimestamp).days)
+        return ((dt - persistent.originalVisitTimestamp).days)
     def getDateHour(time = now.time()):
         return time.hour
     def getTimeOfDay(time = now.time()):
@@ -48,19 +47,19 @@ init -15 python:
 
 # Infer time since the last visit:
 init -10 python:
-    if p.originalVisitTimestamp is None:
+    if persistent.originalVisitTimestamp is None:
         print("Initializing first timestamp")
-        p.originalVisitTimestamp = now
-        p.lastVisitTimestamp = now
+        persistent.originalVisitTimestamp = now
+        persistent.lastVisitTimestamp = now
         applyDefaults()
 
-    tdFromOriginal = (now - p.originalVisitTimestamp)
-    tdFromLast = (now - p.lastVisitTimestamp)
+    tdFromOriginal = (now - persistent.originalVisitTimestamp)
+    tdFromLast = (now - persistent.lastVisitTimestamp)
     
     secSinceOriginalVisit = tdFromOriginal.total_seconds()
     secSinceLastVisit = tdFromLast.total_seconds()
-    print("Last lastVisitTimestamp =", p.lastVisitTimestamp)
-    p.lastVisitTimestamp = now
+    print("Last lastVisitTimestamp =", persistent.lastVisitTimestamp)
+    persistent.lastVisitTimestamp = now
     print("now =", now)
     print("Current Time =", now.strftime("%H:%M:%S"))
     print("Time since first launch =", secSinceOriginalVisit)

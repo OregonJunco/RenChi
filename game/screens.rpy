@@ -1526,9 +1526,9 @@ screen healthbar():
                 bar:
                     xsize hbSize 
                     ysize hbHeight
-                    value p.satiation
+                    value persistent.satiation
                     range 100
-                $ roundedSatiation = int(p.satiation)
+                $ roundedSatiation = int(persistent.satiation)
                 text "Hunger [roundedSatiation]" yalign 0.5
             $ timeDisplayStr = now.strftime("%H:%M")
             $ tod = getTimeOfDay()
