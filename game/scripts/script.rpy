@@ -3,9 +3,15 @@
 # Declare characters used by this game. The color argument colorizes the
 # name of the character.
 
+### Character Definitions: ###
 define t = Character("???")
-default feedChoice = False
 
+
+### Local State Definitions: ###
+default hasNewPoop = False
+
+
+### Animation & Transform Definitions: ###
 image BabySnake animated:
     nearest True
     zoom 10
@@ -17,7 +23,6 @@ image BabySnake animated:
 
 default bodySprite1 = "DuckSnake/no1.png"
 default bodySprite2 = "DuckSnake/no2.png"
-
 image DuckSnake animated:
     nearest True
     zoom 10
@@ -97,14 +102,11 @@ init python:
         else:
             setSprite("Default")
 
-    # Execute time passage consequences
-    hungerDelta = secSinceLastVisit / 10
-    persistent.satiation = max(persistent.satiation - hungerDelta, 0)
-    print("Satiation atrophied by ", hungerDelta, " satiation, satiation is now ", persistent.satiation)
-
 
 label start:
-    show screen healthbar
+    ### Startup Initialization: ###
+    
+    # Set the background appropriately to the real-world time of day
     if getTimeOfDay() == "Morning":
         scene bg morning
     elif getTimeOfDay() == "Afternoon":
@@ -113,22 +115,34 @@ label start:
         scene bg evening
     elif getTimeOfDay() == "Night":
         scene bg night
-
-    play music "audio/DesertAmbience.ogg"
-
-    # Load any existing poop
+    
+    ## Execute time passage consequences: ##
     python:
+        # Atrophy hunger ("satiation") based on how much time has passed since last opening the app
+        hungerDelta = secSinceLastVisit / 10
+        persistent.satiation = max(persistent.satiation - hungerDelta, 0)
+        print("Satiation atrophied by ", hungerDelta, " satiation, satiation is now ", persistent.satiation)
+
+        # Check to see if there's poop, or if we have hit our new poop timestamp and should create a new poop
         if persistent.hasPoop:
             setPoop(True)
         elif now > persistent.nextPoopTs:
             setPoop(True)
             hasNewPoop = True
+        
+        # Display the creature with a sprite appropriate to their current state (satiation, etc.)
         updateSpriteByState()
+
+    # Show the hunger bar
+    show screen healthbar
+
+    # Play Music!
+    play music "audio/DesertAmbience.ogg"
+
     show DuckSnake animated at truecenter
 
     jump introGreeting
 
-default hasNewPoop = False
 label introGreeting:
     # Remark on time passed since last visit:
     if secSinceLastVisit > 30:
@@ -184,5 +198,4 @@ label mainLoop:
             $ updateSpriteByState()
 
     "As above, so below"
-
     jump mainLoop
