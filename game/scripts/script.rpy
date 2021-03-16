@@ -143,7 +143,7 @@ label introGreeting:
         t "Yoooo just in the nick of time, I've started to get a little hungry"
     # No other remark, just say something random
     else:
-        $ possibleWelcomes = ["Nice to see you again", "You again!", "Ayyyyy, there's my favorite human", "What's up mothafuckas guess who's in the HOUSE"]
+        $ possibleWelcomes = ["Nice to see you again", "You again!", "Ayyyyy, there's my favorite human", "What's up losers guess who's in the HOUSE"]
         $ welcome = renpy.random.choice(possibleWelcomes)
         t "[welcome]"
     jump mainLoop
