@@ -165,8 +165,18 @@ label mainLoop:
             else:
                 t "I appreciate that, but I'm actually quite full. Thanks though!"
         "Apologize":
-            t "You apologize too much"
-            t "It's strange, I asked for help, and you apologized. Why the guilt?"
+            if p.hasPoop:
+                t "That's okay!"
+                t "Yes, it's gross that there's poop, but that's really on me as much as it is on you"
+                t "Let's just take care of the situation instead than dwelling on it"
+            elif p.satiation < 50:
+                t "Hey, well thanks for saying sorry"
+                t "I got pretty hungry and I'm a little miffed that you left me for so long, but the acknnowledgement is appreciated"
+                t "Could you maybe feed me?"
+            else:
+                t "You apologize too much"
+                t "What is there to apologize for? I worry that you have a reflexive guilt complex. You should give yourself more credit"
+                t "I often find it useful, when you feel the impulse to apologize, to say \"Thank you\" instead of \"I'm Sorry\""
         "Clean up poop" if p.hasPoop:
             $ setPoop (False)
             $ setSprite("Happy")
