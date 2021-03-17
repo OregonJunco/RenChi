@@ -1526,10 +1526,10 @@ screen healthbar():
                 bar:
                     xsize hbSize 
                     ysize hbHeight
-                    value persistent.satiation
+                    value persistent.hunger
                     range 100
-                $ roundedSatiation = int(persistent.satiation)
-                text "Hunger [roundedSatiation]" yalign 0.5
+                $ roundedhunger = int(persistent.hunger)
+                text "Hunger [roundedhunger]" yalign 0.5
             $ timeDisplayStr = now.strftime("%H:%M")
             $ tod = timeInference.getTimeOfDay()
             text "[timeDisplayStr] ([tod])"

@@ -8,19 +8,15 @@ define t = Character("???")
 
 
 ### Local State Definitions: ###
+# These variables will *not* be saved when the game is opened and closed; only those saved in 'persistent' will
 default hasNewPoop = False
 
 
 ### Animation & Transform Definitions: ###
-image BabySnake animated:
-    nearest True
-    zoom 10
-    "BabySnake/no1.png"
-    pause 0.75
-    "BabySnake/no2.png"
-    pause 0.75
-    repeat
+# Robin: don't worry too much about understanding the animation definitions here; they make the duck-snake animate,
+#  which is cute, but it's not core Ren'Py functionality you need to understand
 
+# Display the duck snake, cycling between two frames of animation
 default bodySprite1 = "DuckSnake/no1.png"
 default bodySprite2 = "DuckSnake/no2.png"
 image DuckSnake animated:
@@ -32,6 +28,7 @@ image DuckSnake animated:
     pause 0.75
     repeat
 
+# Display a poop and make it flip back and forth to give the sense of animation
 image poop:
     nearest True
     xzoom 20
@@ -42,33 +39,24 @@ image poop:
     pause 0.75
     repeat
 
+# The location for the poop to go, on the right-hand side of the screen
 transform poopPos:
     xpos 900
     yalign 0.6
 
 init -11 python:
-    def updatePoopStamp():
+    def chooseNextPoopTimestamp():
         persistent.nextPoopTs = now + timedelta(minutes = 1)
 
     def applyDefaults():
-        persistent.satiation = 100
+        persistent.hunger = 100
         persistent.hasPoop = False
-        updatePoopStamp()
+        chooseNextPoopTimestamp()
 
-    def setPoop(hasPoop):
-        if hasPoop:
-            renpy.show(name="poop", at_list=[poopPos()])
-            persistent.nextPoopTs = datetime.max
-            persistent.hasPoop = True
-        else:
-            updatePoopStamp()
-            renpy.hide("poop")
-            persistent.hasPoop = False
-    def getSprite():
-        return bodySprite1
 
 init python:
-    # Character API:
+    ### Character API: ###
+    # Change the character's active body sprite for both frames of animation
     def setSprite(sprite):
         global bodySprite1
         global bodySprite2
@@ -89,18 +77,28 @@ init python:
             bodySprite2 = "DuckSnake/happy2.png"
         renpy.show("DuckSnake animated")
 
-    def updateSpriteByState():
-        if persistent.satiation < 10:
+    # Change the character's active body sprite to a "neutral" face, which will depend on my level of hunger
+    def applyNeutralSprite():
+        if persistent.hunger < 10:
             setSprite("Sad")
-        elif persistent.satiation < 50:
+        elif persistent.hunger < 50:
             setSprite("Hungry")
         else:
             setSprite("Default")
 
+    # Add or remove poop from the screen
+    def setPoop(hasPoop):
+        if hasPoop:
+            renpy.show(name="poop", at_list=[poopPos()])
+            persistent.nextPoopTs = datetime.max
+            persistent.hasPoop = True
+        else:
+            chooseNextPoopTimestamp()
+            renpy.hide("poop")
+            persistent.hasPoop = False
 
 label start:
     ### Startup Initialization: ###
-    
     # Set the background appropriately to the real-world time of day
     if timeInference.getTimeOfDay() == "Morning":
         scene bg morning
@@ -111,12 +109,12 @@ label start:
     elif timeInference.getTimeOfDay() == "Night":
         scene bg night
     
-    ## Execute time passage consequences: ##
+    ## Execute consequences of the passage of time: ##
     python:
-        # Atrophy hunger ("satiation") based on how much time has passed since last opening the app
+        # Atrophy hunger ("hunger") based on how much time has passed since last opening the app
         hungerDelta = timeInference.secSinceLastVisit / 10
-        persistent.satiation = max(persistent.satiation - hungerDelta, 0)
-        print("Satiation atrophied by ", hungerDelta, " satiation, satiation is now ", persistent.satiation)
+        persistent.hunger = max(persistent.hunger - hungerDelta, 0)
+        print("hunger atrophied by ", hungerDelta, " hunger, hunger is now ", persistent.hunger)
 
         # Check to see if there's poop, or if we have hit our new poop timestamp and should create a new poop
         if persistent.hasPoop:
@@ -125,8 +123,8 @@ label start:
             setPoop(True)
             hasNewPoop = True
         
-        # Display the creature with a sprite appropriate to their current state (satiation, etc.)
-        updateSpriteByState()
+        # Display the creature with a sprite appropriate to their current state (hunger, etc.)
+        applyNeutralSprite()
 
     # Show the hunger bar
     show screen healthbar
@@ -146,11 +144,11 @@ label introGreeting:
         $ hasNewPoop = False
         t "Guess what I pooped???"
     # Remark on stats:
-    if persistent.satiation <= 10:
+    if persistent.hunger <= 10:
         t "Where the hell were you?? I'm starving!"
-    elif persistent.satiation <= 50:
+    elif persistent.hunger <= 50:
         t "Yoooo just in the nick of time, I've started to get a little hungry"
-    # No other remark, just say something random
+    # If no hunger remark, just say something random
     else:
         $ possibleWelcomes = ["Nice to see you again", "You again!", "Ayyyyy, there's my favorite human", "What's up losers guess who's in the HOUSE"]
         $ welcome = renpy.random.choice(possibleWelcomes)
@@ -160,25 +158,25 @@ label introGreeting:
 label mainLoop:
     menu:
         "Feed the creature":
-            if (persistent.satiation < 100):
-                $ persistent.satiation = min(persistent.satiation + 20, 100)
+            if (persistent.hunger < 100):
+                $ persistent.hunger = min(persistent.hunger + 20, 100)
                 $ setSprite("Eating")
                 t "Thank you for feeding me"
                 t "Such is the fate of all creatures, to suck nutrients from the earth until the earth reclaims them"
                 $ setSprite("Happy")
-                if persistent.satiation < 100:
+                if persistent.hunger < 100:
                     t "Still feeling a little peckish tho tbh"
                 else:
                     t "I'm feeling all fed up! Which is to say, very satisfied"
-                $ updateSpriteByState()
+                $ applyNeutralSprite()
             else:
                 t "I appreciate that, but I'm actually quite full. Thanks though!"
         "Apologize":
             if persistent.hasPoop:
                 t "That's okay!"
                 t "Yes, it's gross that there's poop, but that's really on me as much as it is on you"
-                t "Let's just take care of the situation instead than dwelling on it"
-            elif persistent.satiation < 50:
+                t "Let's just take care of the situation instead of dwelling on it"
+            elif persistent.hunger < 50:
                 t "Hey, well thanks for saying sorry"
                 t "I got pretty hungry and I'm a little miffed that you left me for so long, but the acknnowledgement is appreciated"
                 t "Could you maybe feed me?"
@@ -190,7 +188,7 @@ label mainLoop:
             $ setPoop (False)
             $ setSprite("Happy")
             t "Thanks!! God that was gross"
-            $ updateSpriteByState()
+            $ applyNeutralSprite()
 
     "As above, so below"
     jump mainLoop
