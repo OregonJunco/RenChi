@@ -5,21 +5,22 @@
 
 ### Character Definitions: ###
 ##############################
-# A Ren'Py character for the tamagotchi
+# A Ren'Py speaker definition for the tamagotchi
 define t = Character("???")
 
 
 ### Local State Definitions: ###
 ## These variables will *not* be saved when the game is opened and closed; only those saved in 'persistent' will
 ################################
-# A flag for whether a new poop has been created on the startup of this session
+# A flag which, if true, indicates that a new poop has been created on the startup of this session
 default hasNewPoop = False
 
 
 ### Animation & Transform Definitions: ###
 ##########################################
 # Robin: don't worry too much about understanding the animation definitions here; they make the duck-snake animate between two sprites
-#  instead of the default static image, which is cute, but it's not core Ren'Py functionality you need to understand.
+#  instead of the static images you normally get from the "show" command, which is cute, but it's not core Ren'Py functionality you need 
+#  to immediately understand.
 
 # Display the duck snake, cycling between two frames of animation
 default bodySprite1 = "DuckSnake/no1.png"
@@ -33,7 +34,7 @@ image DuckSnake animated:
     pause 0.75
     repeat
 
-# Display a poop and make it flip back and forth to give the sense of animation
+# Display a poop and make it flip back and forth to give a sense of animation
 image poop:
     nearest True
     xzoom 20
@@ -53,9 +54,9 @@ transform poopPos:
 ### Initialization ###
 ######################
 init -11 python:
-    # initializeDefaultPersistentState must be declared here, specificially in "init -11" so that it will be called from 
-    #  the time inference libary initialization which is in init -10. Could probably stand to organize this a little more cleanly
-    # Runs exactly once, the first time the user opens the program. Initializes default values for persisetent state
+    # initializeDefaultPersistentState() must be declared here, specificially in "init -11." This is to ensure it is called from
+    #  the time inference libary initialization, which is in init -10. I could probably stand to organize this a little more cleanly
+    # Runs exactly once, the first time the user opens the program. Initializes default values for persistent state
     def initializeDefaultPersistentState():
         persistent.hunger = 100
         persistent.hasPoop = False
@@ -68,7 +69,7 @@ init -11 python:
 
 init python:
     ### Character API: ###
-    # Change the character's active body sprite for both frames of animation
+    # Change the character's active body sprite according to an expression, making sure to update both frames referenced by the animation
     def setSprite(sprite):
         global bodySprite1
         global bodySprite2
@@ -89,7 +90,7 @@ init python:
             bodySprite2 = "DuckSnake/happy2.png"
         renpy.show("DuckSnake animated")
 
-    # Change the character's active body sprite to a "neutral" face, which will depend on my level of hunger
+    # Change the character's active body sprite to a "neutral" face, which will change depending on my level of hunger
     def applyNeutralSprite():
         if persistent.hunger < 10:
             setSprite("Sad")
@@ -123,14 +124,15 @@ label start:
     
     ## Execute consequences of the passage of time: ##
     python:
-        # Atrophy hunger ("hunger") based on how much time has passed since last opening the app
+        # Atrophy hunger based on how much time has passed since last opening the app. Our creature gets hungry very quickly
         hungerDelta = timeInference.secSinceLastVisit / 10
         persistent.hunger = max(persistent.hunger - hungerDelta, 0)
-        print("hunger atrophied by ", hungerDelta, " hunger, hunger is now ", persistent.hunger)
+        print("hunger atrophied by ", hungerDelta, ". hunger is now ", persistent.hunger)
 
-        # Check to see if there's poop, or if we have hit our new poop timestamp and should create a new poop
+        # Check to see if there's previously existing poop 
         if persistent.hasPoop:
             setPoop(True)
+        # Check to see if we have reached a poop that was previously scheduled
         elif timeInference.startupTs > persistent.nextPoopTs:
             setPoop(True)
             hasNewPoop = True
@@ -141,7 +143,7 @@ label start:
     # Show the hunger bar
     show screen hungerBar
 
-    # Play Music!
+    # Play some background ambiance!
     play music "audio/DesertAmbience.ogg"
 
     show DuckSnake animated at truecenter
@@ -156,12 +158,12 @@ label introGreeting:
     if hasNewPoop:
         $ hasNewPoop = False
         t "Guess what I pooped???"
-    # Remark on stats:
+    # Remark on hunger:
     if persistent.hunger <= 10:
         t "Where the hell were you?? I'm starving!"
     elif persistent.hunger <= 50:
         t "Yoooo just in the nick of time, I've started to get a little hungry"
-    # If no hunger remark, just say something random
+    # If no hunger remark, just say a normal greeting from a pool of random possibilities.
     else:
         $ possibleWelcomes = ["Nice to see you again", "You again!", "Ayyyyy, there's my favorite human", "What's up losers guess who's in the HOUSE"]
         $ welcome = renpy.random.choice(possibleWelcomes)
