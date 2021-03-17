@@ -1513,7 +1513,7 @@ style slider_pref_slider:
     variant "small"
     xsize 600
 
-## CUSTOM ROBIN SCREENS:
+### Custom Tamagotchi Screens: ###
 default hbSize = 400
 default hbHeight = 40
 screen healthbar():
@@ -1531,5 +1531,5 @@ screen healthbar():
                 $ roundedSatiation = int(persistent.satiation)
                 text "Hunger [roundedSatiation]" yalign 0.5
             $ timeDisplayStr = now.strftime("%H:%M")
-            $ tod = getTimeOfDay()
+            $ tod = timeInference.getTimeOfDay()
             text "[timeDisplayStr] ([tod])"

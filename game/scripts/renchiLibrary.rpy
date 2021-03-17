@@ -3,7 +3,6 @@
 # default secSinceLastVisit = 0
 # default tdFromOriginal = None
 # default tdFromLast = None
-# ## Possible values: Morning, Afternoon, Evening, Night
 # default timeOfDay = ""
 
 # Imports & Convenience Definitions
@@ -15,25 +14,29 @@ init -30 python:
 
 # Library Functions
 init -20 python:
-    def getSecondsFromDateTime(dt):
-        return ((dt - datetime(1970, 1, 1)).total_seconds())
-    # In hours.... TODO comment bitch
-    def getHoursKnown():
-        return ((dt - persistent.originalVisitTimestamp).total_hours)
-    def getDaysKnown(dt = now):
-        return ((dt - persistent.originalVisitTimestamp).days)
-    def getDateHour(time = now.time()):
-        return time.hour
-    def getTimeOfDay(time = now.time()):
-        hour = time.hour
-        if hour >= 6 and hour <= 11:
-            return "Morning"
-        if hour >= 12 and hour <= 16:
-            return "Afternoon"
-        if hour >= 17 and hour <= 19:
-            return "Evening"
-        if hour >= 20 or hour <= 5:
-            return "Night"
+    class timeInferenceLibrary:
+        secSinceOriginalVisit = -1
+        secSinceLastVisit = -1
+
+        def getSecondsFromDateTime(self, dt):
+            return ((dt - datetime(1970, 1, 1)).total_seconds())
+        def getHoursSinceFirstVisit(self):
+            return ((dt - persistent.originalVisitTimestamp).total_hours)
+        def getDaysSinceFirstVisit(self, dt = now):
+            return ((dt - persistent.originalVisitTimestamp).days)
+        def getDateHour(self, time = now.time()):
+            return time.hour
+        # ## Possible values: Morning, Afternoon, Evening, Night
+        def getTimeOfDay(self, time = now.time()):
+            if time.hour >= 6 and time.hour <= 11:
+                return "Morning"
+            if time.hour >= 12 and time.hour <= 16:
+                return "Afternoon"
+            if time.hour >= 17 and time.hour <= 19:
+                return "Evening"
+            if time.hour >= 20 or time.hour <= 5:
+                return "Night"
+    timeInference = timeInferenceLibrary()
 
 # tests
 init -15 python:
@@ -55,15 +58,15 @@ init -10 python:
 
     tdFromOriginal = (now - persistent.originalVisitTimestamp)
     tdFromLast = (now - persistent.lastVisitTimestamp)
-    
-    secSinceOriginalVisit = tdFromOriginal.total_seconds()
-    secSinceLastVisit = tdFromLast.total_seconds()
+
+    timeInference.secSinceOriginalVisit = tdFromOriginal.total_seconds()
+    timeInference.secSinceLastVisit = tdFromLast.total_seconds()
     print("Last lastVisitTimestamp =", persistent.lastVisitTimestamp)
     persistent.lastVisitTimestamp = now
     print("now =", now)
     print("Current Time =", now.strftime("%H:%M:%S"))
-    print("Time since first launch =", secSinceOriginalVisit)
-    print("Time since last launch =", secSinceLastVisit)
+    print("Time since first launch =", timeInference.secSinceOriginalVisit)
+    print("Time since last launch =", timeInference.secSinceLastVisit)
 
 
 ## Flow control overrides

@@ -69,7 +69,6 @@ init -11 python:
 
 init python:
     # Character API:
-    firstShowSkipFlag = True
     def setSprite(sprite):
         global bodySprite1
         global bodySprite2
@@ -88,11 +87,7 @@ init python:
         elif sprite == "Happy":
             bodySprite1 = "DuckSnake/happy1.png"
             bodySprite2 = "DuckSnake/happy2.png"
-        global firstShowSkipFlag
-        if not firstShowSkipFlag:
-            renpy.show("DuckSnake animated")
-        else:
-            firstShowSkipFlag = False
+        renpy.show("DuckSnake animated")
 
     def updateSpriteByState():
         if persistent.satiation < 10:
@@ -107,19 +102,19 @@ label start:
     ### Startup Initialization: ###
     
     # Set the background appropriately to the real-world time of day
-    if getTimeOfDay() == "Morning":
+    if timeInference.getTimeOfDay() == "Morning":
         scene bg morning
-    elif getTimeOfDay() == "Afternoon":
+    elif timeInference.getTimeOfDay() == "Afternoon":
         scene bg afternoon
-    elif getTimeOfDay() == "Evening":
+    elif timeInference.getTimeOfDay() == "Evening":
         scene bg evening
-    elif getTimeOfDay() == "Night":
+    elif timeInference.getTimeOfDay() == "Night":
         scene bg night
     
     ## Execute time passage consequences: ##
     python:
         # Atrophy hunger ("satiation") based on how much time has passed since last opening the app
-        hungerDelta = secSinceLastVisit / 10
+        hungerDelta = timeInference.secSinceLastVisit / 10
         persistent.satiation = max(persistent.satiation - hungerDelta, 0)
         print("Satiation atrophied by ", hungerDelta, " satiation, satiation is now ", persistent.satiation)
 
@@ -145,8 +140,8 @@ label start:
 
 label introGreeting:
     # Remark on time passed since last visit:
-    if secSinceLastVisit > 30:
-        t "Oh wow, you again? It's been a minute. Precisely, [secSinceLastVisit] seconds"
+    if timeInference.secSinceLastVisit > 30:
+        t "Oh wow, you again? It's been a minute. Precisely, [timeInference.secSinceLastVisit] seconds"
     if hasNewPoop:
         $ hasNewPoop = False
         t "Guess what I pooped???"
