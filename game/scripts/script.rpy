@@ -127,7 +127,7 @@ label start:
         applyNeutralSprite()
 
     # Show the hunger bar
-    show screen healthbar
+    show screen hungerBar
 
     # Play Music!
     play music "audio/DesertAmbience.ogg"

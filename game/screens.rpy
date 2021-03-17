@@ -1516,7 +1516,7 @@ style slider_pref_slider:
 ### Custom Tamagotchi Screens: ###
 default hbSize = 400
 default hbHeight = 40
-screen healthbar():
+screen hungerBar():
     fixed:
         xpos 1280 - hbSize
         vbox:
