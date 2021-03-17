@@ -1,20 +1,25 @@
-﻿# The script of the game goes in this file.
-
-# Declare characters used by this game. The color argument colorizes the
-# name of the character.
+﻿## Note from Robin: ###
+#  When beginning to go through this example, I recommend starting at the "label introGreeting" section halfway below. Then, come back and read
+#   this file from the top. "label introGreeting" is the start of where game content and behavior is run, whereas this first section is where
+#   we define core functionality and handle initialization
 
 ### Character Definitions: ###
+##############################
+# A Ren'Py character for the tamagotchi
 define t = Character("???")
 
 
 ### Local State Definitions: ###
-# These variables will *not* be saved when the game is opened and closed; only those saved in 'persistent' will
+## These variables will *not* be saved when the game is opened and closed; only those saved in 'persistent' will
+################################
+# A flag for whether a new poop has been created on the startup of this session
 default hasNewPoop = False
 
 
 ### Animation & Transform Definitions: ###
-# Robin: don't worry too much about understanding the animation definitions here; they make the duck-snake animate,
-#  which is cute, but it's not core Ren'Py functionality you need to understand
+##########################################
+# Robin: don't worry too much about understanding the animation definitions here; they make the duck-snake animate between two sprites
+#  instead of the default static image, which is cute, but it's not core Ren'Py functionality you need to understand.
 
 # Display the duck snake, cycling between two frames of animation
 default bodySprite1 = "DuckSnake/no1.png"
@@ -44,14 +49,21 @@ transform poopPos:
     xpos 900
     yalign 0.6
 
-init -11 python:
-    def chooseNextPoopTimestamp():
-        persistent.nextPoopTs = now + timedelta(minutes = 1)
 
-    def applyDefaults():
+### Initialization ###
+######################
+init -11 python:
+    # initializeDefaultPersistentState must be declared here, specificially in "init -11" so that it will be called from 
+    #  the time inference libary initialization which is in init -10. Could probably stand to organize this a little more cleanly
+    # Runs exactly once, the first time the user opens the program. Initializes default values for persisetent state
+    def initializeDefaultPersistentState():
         persistent.hunger = 100
         persistent.hasPoop = False
-        chooseNextPoopTimestamp()
+        scheduleNextPoop()
+
+    # Schedule a poop 1 minute from the current time
+    def scheduleNextPoop():
+        persistent.nextPoopTs = datetime.now() + timedelta(minutes = 1)
 
 
 init python:
@@ -93,12 +105,12 @@ init python:
             persistent.nextPoopTs = datetime.max
             persistent.hasPoop = True
         else:
-            chooseNextPoopTimestamp()
+            scheduleNextPoop()
             renpy.hide("poop")
             persistent.hasPoop = False
 
+####### Startup Initialization: #######
 label start:
-    ### Startup Initialization: ###
     # Set the background appropriately to the real-world time of day
     if timeInference.getTimeOfDay() == "Morning":
         scene bg morning
@@ -119,7 +131,7 @@ label start:
         # Check to see if there's poop, or if we have hit our new poop timestamp and should create a new poop
         if persistent.hasPoop:
             setPoop(True)
-        elif now > persistent.nextPoopTs:
+        elif timeInference.startupTs > persistent.nextPoopTs:
             setPoop(True)
             hasNewPoop = True
         
@@ -136,6 +148,7 @@ label start:
 
     jump introGreeting
 
+# Choose an introductory greeting to give the player:
 label introGreeting:
     # Remark on time passed since last visit:
     if timeInference.secSinceLastVisit > 30:
@@ -155,6 +168,7 @@ label introGreeting:
         t "[welcome]"
     jump mainLoop
 
+# This is the main "loop" containing menu actions that are always availebl. It will always run in a cycle.
 label mainLoop:
     menu:
         "Feed the creature":

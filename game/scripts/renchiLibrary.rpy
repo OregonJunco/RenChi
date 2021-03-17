@@ -10,24 +10,24 @@ init -30 python:
     from datetime import datetime
     from datetime import timedelta
 
-    now = datetime.now()
 
 # Library Functions
 init -20 python:
     class timeInferenceLibrary:
         secSinceOriginalVisit = -1
         secSinceLastVisit = -1
+        startupTs = datetime.now()
 
         def getSecondsFromDateTime(self, dt):
             return ((dt - datetime(1970, 1, 1)).total_seconds())
         def getHoursSinceFirstVisit(self):
             return ((dt - persistent.originalVisitTimestamp).total_hours)
-        def getDaysSinceFirstVisit(self, dt = now):
+        def getDaysSinceFirstVisit(self, dt = datetime.now()):
             return ((dt - persistent.originalVisitTimestamp).days)
-        def getDateHour(self, time = now.time()):
+        def getDateHour(self, time = datetime.now()):
             return time.hour
         # ## Possible values: Morning, Afternoon, Evening, Night
-        def getTimeOfDay(self, time = now.time()):
+        def getTimeOfDay(self, time = datetime.now()):
             if time.hour >= 6 and time.hour <= 11:
                 return "Morning"
             if time.hour >= 12 and time.hour <= 16:
@@ -38,18 +38,10 @@ init -20 python:
                 return "Night"
     timeInference = timeInferenceLibrary()
 
-# tests
-init -15 python:
-    def runTests():
-        allHours = range(24)
-        for h in allHours:
-            # fakeTime = datetime.time(hour = h)
-            fakeTime = datetime(1970, 1, 1, h).time()
-            # print("Testing with fakeTime" + fakeTime)
-            print("hour ", h, " is ", getTimeOfDay(fakeTime))
-
-# Infer time since the last visit:
+# First startup: run time inference
 init -10 python:
+    # If we have no original visit timestamp, this is a brand-new session!
+    now = datetime.now()
     if persistent.originalVisitTimestamp is None:
         print("Initializing first timestamp")
         persistent.originalVisitTimestamp = now
