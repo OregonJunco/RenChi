@@ -168,7 +168,7 @@ label introGreeting:
         t "[welcome]"
     jump mainLoop
 
-# This is the main "loop" containing menu actions that are always availebl. It will always run in a cycle.
+# This is the main "loop" containing menu actions that are always available. It will always run in a cycle.
 label mainLoop:
     menu:
         "Feed the creature":
