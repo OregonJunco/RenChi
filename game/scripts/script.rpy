@@ -14,7 +14,8 @@ define t = Character("???")
 ################################
 # A flag which, if true, indicates that a new poop has been created on the startup of this session
 default hasNewPoop = False
-
+# Whether the player has pet the creature this session
+default hasPetThisSession = False
 
 ### Animation & Transform Definitions: ###
 ##########################################
@@ -155,14 +156,21 @@ label start:
 
 # Choose an introductory greeting to give the player:
 label introGreeting:
+
     # Remark on time passed since last visit:
     if timeInference.secSinceLastVisit > 30:
         t "Oh wow, you again? It's been a minute. Precisely, [timeInference.secSinceLastVisit] seconds"
     if hasNewPoop:
         $ hasNewPoop = False
         t "Guess what I pooped???"
+
+    # If first visit, say a special introductory line
+    if persistent.originalVisitTimestamp ==persistent.lastVisitTimestamp:
+        t "Hi there!! Welcome!!! It's great to finally meet you"
+        t "I am a vulnerable creature in your care"
+        t "I would like it very much if you could swing by around later to feed me."
     # Remark on hunger:
-    if persistent.hunger <= 10:
+    elif persistent.hunger <= 10:
         t "Where the hell were you?? I'm starving!"
     elif persistent.hunger <= 50:
         t "Yoooo just in the nick of time, I've started to get a little hungry"
@@ -190,6 +198,12 @@ label mainLoop:
                 $ applyNeutralSprite()
             else:
                 t "I appreciate that, but I'm actually quite full. Thanks though!"
+        "Pet the creature" if hasPetThisSession == False:
+            "You rub your hand along the top of the creature"
+            t "Awww, that feels good!"
+            "Their head is smoother than any material you have ever touched"
+            t "Thank you :)"
+            $ hasPetThisSession = True
         "Apologize":
             if persistent.hasPoop:
                 t "That's okay!"
@@ -209,5 +223,5 @@ label mainLoop:
             t "Thanks!! God that was gross"
             $ applyNeutralSprite()
 
-    "As above, so below"
+    "As above, so below."
     jump mainLoop
