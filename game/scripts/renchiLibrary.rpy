@@ -54,8 +54,7 @@ init -10 python:
     print("Time since last launch =", timeInference.secSinceLastVisit)
 
 
-## Flow control overrides
-
+## Flow control overrides:
 # Skip the main menu that Ren'Py normally shows and jump straight to the creature's greeting
 label main_menu:
     return

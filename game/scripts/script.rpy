@@ -112,6 +112,9 @@ init python:
 
 ####### Startup Initialization: #######
 label start:
+    # Disable right-click menu
+    $ _game_menu_screen = None
+
     # Set the background appropriately to the real-world time of day
     if timeInference.getTimeOfDay() == "Morning":
         scene bg morning
