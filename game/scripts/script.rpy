@@ -1,4 +1,4 @@
-﻿## Note from Robin: ###
+## Note from Robin: ###
 #  When beginning to go through this example, I recommend starting at the "label introGreeting" section halfway below. Then, come back and read
 #   this file from the top. "label introGreeting" is the start of where game content and behavior is run, whereas this first section is where
 #   we define core functionality and handle initialization
@@ -89,6 +89,9 @@ init python:
         elif sprite == "Happy":
             bodySprite1 = "DuckSnake/happy1.png"
             bodySprite2 = "DuckSnake/happy2.png"
+        elif sprite == "Angry":
+            bodySprite1 = "DuckSnake/angry1.png"
+            bodySprite2 = "DuckSnake/angry2.png"
         renpy.show("DuckSnake animated")
 
     # Change the character's active body sprite to a "neutral" face, which will change depending on my level of hunger
