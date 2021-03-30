@@ -1,24 +1,38 @@
-## Note from Robin: ###
+﻿## Note from Robin: ###
 #  When beginning to go through this example, I recommend starting at the "label introGreeting" section halfway below. Then, come back and read
 #   this file from the top. "label introGreeting" is the start of where game content and behavior is run, whereas this first section is where
 #   we define core functionality and handle initialization
 
+## TODO:
+# X Appointments:
+#    - String helpers for appointments
+# - "Fake timestamp" functionality
+# - Day # functionality
+# - "Days known" gates
+# - Mumble sounds
+
+
 ### Character Definitions: ###
-##############################
 # A Ren'Py speaker definition for the tamagotchi
 define t = Character("???")
 
 
 ### Local State Definitions: ###
 ## These variables will *not* be saved when the game is opened and closed; only those saved in 'persistent' will
-################################
+
 # A flag which, if true, indicates that a new poop has been created on the startup of this session
 default hasNewPoop = False
 # Whether the player has pet the creature this session
 default hasPetThisSession = False
 
+
+### Constants ###
+## These are unchanging variables which are defined here so that they can be used consistently
+define partyPrepDurationMinutes = 2
+define partyLateThresholdMinutes = 5
+
+
 ### Animation & Transform Definitions: ###
-##########################################
 # Robin: don't worry too much about understanding the animation definitions here; they make the duck-snake animate between two sprites
 #  instead of the static images you normally get from the "show" command, which is cute, but it's not core Ren'Py functionality you need 
 #  to immediately understand.
@@ -52,8 +66,8 @@ transform poopPos:
     yalign 0.6
 
 
-### Initialization ###
-######################
+##### Initialization #####
+
 init -11 python:
     # initializeDefaultPersistentState() must be declared here, specificially in "init -11." This is to ensure it is called from
     #  the time inference libary initialization, which is in init -10. I could probably stand to organize this a little more cleanly
@@ -161,8 +175,33 @@ label start:
 label introGreeting:
 
     # Remark on time passed since last visit:
-    if timeInference.secSinceLastVisit > 30:
+    # If we have a scheduled party, react to that party:
+    $ partyAppointment = timeInference.getScheduledAppointment("Test Party")
+    if not partyAppointment is None:
+        $ partyTimeliness = partyAppointment.getMinutesWithinAppointment()
+        $ print("Party timeliness is ", partyTimeliness)
+        # Case 1: early to the party:
+        if partyTimeliness < 0:
+            $ timeUntilParty = -1 * partyTimeliness
+            t "Hey again! If you're here for the party, I'm still setting up. Please come back in [timeUntilParty] minutes"
+        # Case 2: late to the party:
+        elif partyTimeliness > partyLateThresholdMinutes:
+            $ timeInference.unscheduleAppointment("Test Party")
+            $ setSprite("Angry")
+            t "Well look who came crawling in."
+            t "You're late! I planned a whole party and you didn't even show up"
+            play sound "audio/PartyBlower.wav"
+            t "What the hell!!!"
+            t "I get it, you're busy, it happens to the best of us, but maybe text me or something next time??? Jeez."
+            t "Some people..."
+            $ applyNeutralSprite()
+        # Case 3: on time for the party!
+        else:
+            $ timeInference.unscheduleAppointment("Test Party")
+            jump scheduledParty
+    elif timeInference.secSinceLastVisit > 30:
         t "Oh wow, you again? It's been a minute. Precisely, [timeInference.secSinceLastVisit] seconds"
+
     if hasNewPoop:
         $ hasNewPoop = False
         t "Guess what I pooped???"
@@ -225,6 +264,27 @@ label mainLoop:
             $ setSprite("Happy")
             t "Thanks!! God that was gross"
             $ applyNeutralSprite()
+        "Schedule party" if not timeInference.hasScheduledAppointment("Test Party"):
+            t "Hey, I know! Let's schedule a party!"
+            t "I will need a few minutes to prepare"
+            t "Please meet me back here in [partyPrepDurationMinutes] minutes and I will have the party set up"
+            t "Don't be early, and please dont be more than [partyLateThresholdMinutes] minutes late or else the appetizers will get cold"
+            $ timeInference.scheduleAppointmentWithDelta("Test Party", timedelta(minutes = partyPrepDurationMinutes))
 
     "As above, so below."
     jump mainLoop
+
+label scheduledParty:
+    show bg party
+    play sound "audio/PartyBlower.wav"
+    $ setSprite("Happy")
+    t "Surprise!!!!"
+    $ applyNeutralSprite()
+    t "... Is what I would have said, had this not been an immaculately scheduled event for which I gave you significant advance notice"
+    t "......"
+    $ setSprite("Happy")
+    t "Isn't this great!"
+    t "Party time!!!"
+    $ applyNeutralSprite()
+    jump mainLoop
+
