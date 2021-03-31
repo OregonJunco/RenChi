@@ -7,7 +7,7 @@ init -30 python:
 # Library Functions
 init -20 python:
     # On initializing, cook the time spoof data into a datetime
-    if timeSpoofData.USE_TIMESPOOFING:
+    if (not timeSpoofData is None) and timeSpoofData.USE_TIMESPOOFING:
         # Clean up spoofed values to prevent argument errors
         timeSpoofData.day = max(1, min(31, timeSpoofData.day))
         timeSpoofData.hour = max(0, min(23, timeSpoofData.hour))
@@ -67,7 +67,7 @@ init -20 python:
         ##  Use this instead of datetime.now() to make your project compatible with spoofing
         def getCurrentDateTime(self):
             global timeSpoofData
-            if timeSpoofData.USE_TIMESPOOFING:
+            if (not timeSpoofData is None) and timeSpoofData.USE_TIMESPOOFING:
                 # If spoofing, use the spoofed startup time plus the amount of real time that has ellapsed since opening the app
                 timeEllapsedSinceOpening = datetime.now() - self.realStartupTs
                 return timeSpoofData.spoofedStartupTs + timeEllapsedSinceOpening
@@ -152,6 +152,12 @@ init -10 python:
     tdFromLast = (now - persistent.lastVisitTimestamp)
     timeInference.secSinceOriginalVisit = tdFromOriginal.total_seconds()
     timeInference.secSinceLastVisit = tdFromLast.total_seconds()
+
+    # Check for backwards time travel
+    if (timeInference.secSinceLastVisit < -0.01):
+        renpy.error("ERROR: detected a negative time delta, meaning that the spoofed timestamp is earlier than the last timestamp. "
+            + "This is invalid; either move the spoofed timestamp back, or clear persistent data to create a new starting timestamp")
+
     print("Last lastVisitTimestamp =", persistent.lastVisitTimestamp)
     persistent.lastVisitTimestamp = now
     print("now =", now)
