@@ -1,4 +1,4 @@
-## Note from Robin: ###
+﻿## Note from Robin: ###
 #  When beginning to go through this example, I recommend starting at the "label introGreeting" section halfway below. Then, come back and read
 #   this file from the top. "label introGreeting" is the start of where game content and behavior is run, whereas this first section is where
 #   we define core functionality and handle initialization
@@ -6,7 +6,9 @@
 ## TODO:
 # X Appointments:
 #    - String helpers for appointments
-# - "Fake timestamp" functionality
+# X "Fake timestamp" functionality
+# X Permanent progress example
+# - Backwards time travel warning / error
 # - Day # functionality
 # - "Days known" gates
 # - Mumble sounds
@@ -231,10 +233,18 @@ label introGreeting:
 
 # This is the main "loop" containing menu actions that are always available. It will always run in a cycle.
 label mainLoop:
+    # See if we have the menu option to ask the 
+    python:
+        adviceMenuOption = tryGetAdviceMenuOption()
+        if adviceMenuOption is None:
+            adviceMenuOption = ""
+        print("Date Menu option returned ", adviceMenuOption)
+
+    # Display the main menu of all options
     menu:
         "Feed the creature":
             if (persistent.hunger < 100):
-                $ persistent.hunger = min(persistent.hunger + 20, 100)
+                $ persistent.hunger = min(persistent.hunger + 35, 100)
                 $ setSprite("Eating")
                 t "Thank you for feeding me"
                 t "Such is the fate of all creatures, to suck nutrients from the earth until the earth reclaims them"
@@ -276,6 +286,8 @@ label mainLoop:
             t "Please meet me back here in [partyPrepDurationMinutes] minutes and I will have the party set up"
             t "Don't be early, and please dont be more than [partyLateThresholdMinutes] minutes late or else the appetizers will get cold"
             $ timeInference.scheduleAppointmentWithDelta("Test Party", timedelta(minutes = partyPrepDurationMinutes))
+        "[adviceMenuOption]" if not adviceMenuOption == "":
+            $ jumpToNextAdviceLabel()
 
     "As above, so below."
     jump mainLoop
