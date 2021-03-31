@@ -5,14 +5,13 @@
 
 ## TODO:
 # X Appointments:
-#    - String helpers for appointments
 # X "Fake timestamp" functionality
 # X Permanent progress example
 # X Backwards time travel warning / error
 # X Day # functionality
-# - Make time travel warning less horrible
+# X Make time travel warning less horrible
 # X "Days known" gates
-# - Mumble sounds
+# X Better Dating update text
 
 
 ### Character Definitions: ###
@@ -27,6 +26,8 @@ define t = Character("???")
 default hasNewPoop = False
 # Whether the player has pet the creature this session
 default hasPetThisSession = False
+# Whether the player has advanced the "Dating advice" story this session
+default hasCheckedAdviceQuestThisSession = False
 
 
 ### Constants ###
@@ -78,6 +79,7 @@ init -11 python:
     def initializeDefaultPersistentState():
         persistent.hunger = 100
         persistent.hasPoop = False
+        persistent.isMarried = False
         scheduleNextPoop()
 
     # Schedule a poop 1 minute from the current time
@@ -169,6 +171,10 @@ label start:
         
         # Display the creature with a sprite appropriate to their current state (hunger, etc.)
         applyNeutralSprite()
+    
+    # Display a ring if we're married!
+    if persistent.isMarried:
+        show obj ring at left
 
     # Show the hunger bar
     show screen hungerBar
@@ -234,12 +240,10 @@ label introGreeting:
 
 # This is the main "loop" containing menu actions that are always available. It will always run in a cycle.
 label mainLoop:
-    # See if we have the menu option to ask the 
+    # See if we have the menu option that allows the human to ask the creature about their love life
     python:
         adviceMenuOption = tryGetAdviceMenuOption()
-        if adviceMenuOption is None:
-            adviceMenuOption = ""
-        print("Date Menu option returned ", adviceMenuOption)
+        print("tryGetAdviceMenuOption returned Menu option \"", adviceMenuOption, "\"")
 
     # Display the main menu of all options
     menu:
@@ -287,8 +291,14 @@ label mainLoop:
             t "Please meet me back here in [partyPrepDurationMinutes] minutes and I will have the party set up"
             t "Don't be early, and please dont be more than [partyLateThresholdMinutes] minutes late or else the appetizers will get cold"
             $ timeInference.scheduleAppointmentWithDelta("Test Party", timedelta(minutes = partyPrepDurationMinutes))
-        "[adviceMenuOption]" if not adviceMenuOption == "":
+        # If there's a new option to advance the "dating advice" story, offer it in the menu:
+        "[adviceMenuOption]" if not adviceMenuOption is None:
+            $ hasCheckedAdviceQuestThisSession = True
             $ jumpToNextAdviceLabel()
+        # Otherwise, show an option to ask about the dating update. Only show this if the player hasn't asked this session, and if the quest is neither yet-to-be started nor 100% complete
+        "What's new in your love life?" if adviceMenuOption is None and not hasCheckedAdviceQuestThisSession and not (persistent.adviceQuestMilestone is None or persistent.isMarried):
+            t "No updates yet!! Maybe later, though. Thank you for asking :)"
+            $ hasCheckedAdviceQuestThisSession = True
 
     "As above, so below."
     jump mainLoop

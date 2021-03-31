@@ -184,4 +184,5 @@ label marriageSuccess:
     $ applyNeutralSprite()
     $ timeInference.unscheduleAppointment(dateUpdateAppointment)
     $ persistent.adviceQuestMilestone = adviceMilestoneFinishedQuest
+    $ persistent.isMarried = True
     jump mainLoop
