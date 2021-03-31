@@ -1,4 +1,6 @@
-﻿## Note from Robin: ###
+﻿## This is Version 2.0 of the Tamagotchi Demo!
+
+## Note from Robin: ###
 #  When beginning to go through this example, I recommend starting at the "label introGreeting" section halfway below. Then, come back and read
 #   this file from the top. "label introGreeting" is the start of where game content and behavior is run, whereas this first section is where
 #   we define core functionality and handle initialization

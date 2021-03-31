@@ -1,3 +1,5 @@
+## This is Version 2.0 of the Tamagotchi Demo!
+
 # Imports & Convenience Definitions
 init -30 python:
     from datetime import datetime
