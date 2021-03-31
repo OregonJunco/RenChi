@@ -7,10 +7,11 @@ init -29 python:
     timeSpoofData.USE_TIMESPOOFING = False
 
     ## Change The below values to set the spoofed date!
+    timeSpoofData.month = 4
     # The day of the month (minimum is 1, maximum is the number of days in the current month)
     timeSpoofData.day = 1
-    # The hour of the day, using a 24 hour clock (13 is 1pm, etc.)
-    timeSpoofData.hour = 12
-    # The current minute within the hour of the day, from 0 to 59
+    # The hour of the day, using a 24 hour clock (0-23 value range with 13 being 1pm, etc.)
+    timeSpoofData.hour = 0
+    # The current minute within 'the hour of the day, from 0 to 59
     timeSpoofData.minute = 0
 

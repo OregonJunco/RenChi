@@ -2,6 +2,7 @@
 init -30 python:
     from datetime import datetime
     from datetime import timedelta
+    from calendar import monthrange
 
 
 # Library Functions
@@ -9,13 +10,14 @@ init -20 python:
     # On initializing, cook the time spoof data into a datetime
     if (not timeSpoofData is None) and timeSpoofData.USE_TIMESPOOFING:
         # Clean up spoofed values to prevent argument errors
+
         timeSpoofData.day = max(1, min(31, timeSpoofData.day))
         timeSpoofData.hour = max(0, min(23, timeSpoofData.hour))
         timeSpoofData.minute = max(0, min(59, timeSpoofData.minute))
 
         # Use the actual current year and month with a spoofed day, hour, and minute
         realNow = datetime.now()
-        timeSpoofData.spoofedStartupTs = datetime(year = realNow.year, month = realNow.month, 
+        timeSpoofData.spoofedStartupTs = datetime(year = realNow.year, month = timeSpoofData.month,
             day = timeSpoofData.day, hour = timeSpoofData.hour, minute = timeSpoofData.minute)
 
     # Appointments are an easy way to set target dates in the future that you can react to!
@@ -78,9 +80,28 @@ init -20 python:
         def getHoursSinceFirstVisit(self):
             return ((self.getCurrentDateTime() - persistent.originalVisitTimestamp).total_seconds() / (60 * 60))
 
-        ## Return the number of days since the first visit
-        def getDaysSinceFirstVisit(self):
-            return ((self.getCurrentDateTime() - persistent.originalVisitTimestamp).days)
+        ## Return the numbered day of the companionship period; 1 is the first day you opened the creature, 2 is the day after, etc.
+        def getCompanionshipPeriodDay(self):
+            now = self.getCurrentDateTime()
+            firstVisit = persistent.originalVisitTimestamp
+            
+            output = 0
+            # Handle the case where the current month is different from the month you first opened the creature (we don't handle year loops, don't @ me)
+            if now.month > firstVisit.month:
+                monthCounter = firstVisit.month
+                while now.month > monthCounter:
+                    mr = monthrange(firstVisit.year, monthCounter)
+                    if monthCounter == firstVisit.month:
+                        output += mr[1] - firstVisit.day
+                    else:
+                        output += mr[1]
+                    monthCounter += 1
+                output += now.day
+            else:
+                output = now.day - firstVisit.day
+            # Add 1 to output so that the 1st day is 1 instead of 0
+            output += 1
+            return output
         
         ## Return the time of day as a readable string. Possible values: Morning, Afternoon, Evening, Night
         def getTimeOfDay(self):
@@ -154,9 +175,9 @@ init -10 python:
     timeInference.secSinceLastVisit = tdFromLast.total_seconds()
 
     # Check for backwards time travel
-    if (timeInference.secSinceLastVisit < -0.01):
+    if (not timeSpoofData is None) and timeSpoofData.USE_TIMESPOOFING and timeInference.secSinceLastVisit < -1:
         renpy.error("ERROR: detected a negative time delta, meaning that the spoofed timestamp is earlier than the last timestamp. "
-            + "This is invalid; either move the spoofed timestamp back, or clear persistent data to create a new starting timestamp")
+            + "This is invalid; either move the spoofed timestamp forward, or clear persistent data to create a new starting timestamp")
 
     print("Last lastVisitTimestamp =", persistent.lastVisitTimestamp)
     persistent.lastVisitTimestamp = now
