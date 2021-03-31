@@ -3,16 +3,6 @@
 #   this file from the top. "label introGreeting" is the start of where game content and behavior is run, whereas this first section is where
 #   we define core functionality and handle initialization
 
-## TODO:
-# X Appointments:
-# X "Fake timestamp" functionality
-# X Permanent progress example
-# X Backwards time travel warning / error
-# X Day # functionality
-# X Make time travel warning less horrible
-# X "Days known" gates
-# X Better Dating update text
-
 
 ### Character Definitions: ###
 # A Ren'Py speaker definition for the tamagotchi
