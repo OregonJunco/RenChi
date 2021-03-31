@@ -79,7 +79,8 @@ init -11 python:
 
     # Schedule a poop 1 minute from the current time
     def scheduleNextPoop():
-        persistent.nextPoopTs = datetime.now() + timedelta(minutes = 1)
+        global timeInference
+        persistent.nextPoopTs = timeInference.getCurrentDateTime() + timedelta(minutes = 1)
 
 
 init python:
@@ -154,7 +155,7 @@ label start:
         if persistent.hasPoop:
             setPoop(True)
         # Check to see if we have reached a poop that was previously scheduled
-        elif timeInference.startupTs > persistent.nextPoopTs:
+        elif timeInference.getCurrentDateTime() > persistent.nextPoopTs:
             setPoop(True)
             hasNewPoop = True
         
@@ -207,7 +208,7 @@ label introGreeting:
         t "Guess what I pooped???"
 
     # If first visit, say a special introductory line
-    if persistent.originalVisitTimestamp ==persistent.lastVisitTimestamp:
+    if timeInference.isFirstEverVisit:
         t "Hi there!! Welcome!!! It's great to finally meet you"
         t "I am a vulnerable creature in your care"
         t "I would like it very much if you could swing by around later to feed me."

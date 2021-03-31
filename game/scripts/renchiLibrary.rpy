@@ -6,6 +6,19 @@ init -30 python:
 
 # Library Functions
 init -20 python:
+    # On initializing, cook the time spoof data into a datetime
+    if timeSpoofData.USE_TIMESPOOFING:
+        # Clean up spoofed values to prevent argument errors
+        timeSpoofData.day = max(1, min(31, timeSpoofData.day))
+        timeSpoofData.hour = max(0, min(23, timeSpoofData.hour))
+        timeSpoofData.minute = max(0, min(59, timeSpoofData.minute))
+
+        # Use the actual current year and month with a spoofed day, hour, and minute
+        realNow = datetime.now()
+        timeSpoofData.spoofedStartupTs = datetime(year = realNow.year, month = realNow.month, 
+            day = timeSpoofData.day, hour = timeSpoofData.hour, minute = timeSpoofData.minute)
+
+    # Appointments are an easy way to set target dates in the future that you can react to!
     class appointment():
         name = ""
         timestamp = None
@@ -17,7 +30,8 @@ init -20 python:
         ##  Output is signed; a return value of "30" means "30 minutes late", -30 means "30 minutes early"
         ##  By comparing this value to user-set thresholds, you can determine earlyness, lateness, etc.
         def getMinutesWithinAppointment(self):
-            return (datetime.now() - self.timestamp).total_seconds() / 60# * (1 if datetime.now() > self.timestamp else -1);
+            global timeInference
+            return (timeInference.getCurrentDateTime() - self.timestamp).total_seconds() / 60
 
         ## Save the appointment name and time into the "persistent" variable, so that any changes are reflected in the next play session
         def saveToDisk(self):
@@ -40,25 +54,37 @@ init -20 python:
                     indexToDelete = i
             if (indexToDelete >= 0):
                 del persistent.storedAppointments[indexToDelete]
-            
 
     # The time inference library is a one-stop-shop for Ren'Py code that needs to reference the passage of time
     #  outside the app.
     class timeInferenceLibrary:
         secSinceOriginalVisit = -1
         secSinceLastVisit = -1
-        startupTs = datetime.now()
+        realStartupTs = datetime.now()
+        isFirstEverVisit = False
+
+        ## Returns the actual current date, or, if time spoofing is being used, the spoofed date.
+        ##  Use this instead of datetime.now() to make your project compatible with spoofing
+        def getCurrentDateTime(self):
+            global timeSpoofData
+            if timeSpoofData.USE_TIMESPOOFING:
+                # If spoofing, use the spoofed startup time plus the amount of real time that has ellapsed since opening the app
+                timeEllapsedSinceOpening = datetime.now() - self.realStartupTs
+                return timeSpoofData.spoofedStartupTs + timeEllapsedSinceOpening
+            else:
+                return datetime.now()
 
         ## Return the number of hours since the first visit
         def getHoursSinceFirstVisit(self):
             return ((dt - persistent.originalVisitTimestamp).total_hours)
 
         ## Return the number of days since the first visit
-        def getDaysSinceFirstVisit(self, dt = datetime.now()):
+        def getDaysSinceFirstVisit(self):
             return ((dt - persistent.originalVisitTimestamp).days)
         
         ## Return the time of day as a readable string. Possible values: Morning, Afternoon, Evening, Night
-        def getTimeOfDay(self, time = datetime.now()):
+        def getTimeOfDay(self):
+            time = self.getCurrentDateTime()
             if time.hour >= 6 and time.hour <= 11:
                 return "Morning"
             if time.hour >= 12 and time.hour <= 16:
@@ -81,7 +107,8 @@ init -20 python:
         
         ## Schedule an appointment to take place at a specified time delta from the current time (e.g. "in 15 minutes")
         def scheduleAppointmentWithDelta(self, appointmentName, deltaToAppointment):
-            return self.scheduleAppointmentWithTimestamp(appointmentName, datetime.now() + deltaToAppointment)
+            global timeInference
+            return self.scheduleAppointmentWithTimestamp(appointmentName, timeInference.getCurrentDateTime() + deltaToAppointment)
         
         ## Schedule an appointment to take place at absolute timestamp
         def scheduleAppointmentWithTimestamp(self, appointmentName, timestamp):
@@ -109,14 +136,16 @@ init -20 python:
 init -10 python:
     # If we have no original visit timestamp, this is a brand-new session!
     #  Set up some initial values
-    now = datetime.now()
+    now = timeInference.getCurrentDateTime()
     if persistent.isInitialized is None:
         print("No persistent data: running first-time initialization")
         persistent.isInitialized = True
         persistent.originalVisitTimestamp = now
         persistent.lastVisitTimestamp = now
         persistent.storedAppointments = []
-        initializeDefaultPersistentState() # This is defined in the main script.rpy file
+        if not initializeDefaultPersistentState is None:
+            initializeDefaultPersistentState() # This is defined in the main script.rpy file
+        timeInference.isFirstEverVisit = True
 
     # Calculate how long it's been since the last visit, and since the original visit
     tdFromOriginal = (now - persistent.originalVisitTimestamp)
