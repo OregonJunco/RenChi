@@ -9,14 +9,15 @@ init -30 python:
 init -20 python:
     # On initializing, cook the time spoof data into a datetime
     if (not timeSpoofData is None) and timeSpoofData.USE_TIMESPOOFING:
+        realNow = datetime.now()
+        
         # Clean up spoofed values to prevent argument errors
-
-        timeSpoofData.day = max(1, min(31, timeSpoofData.day))
+        numDaysInMonth = monthrange(realNow.year, timeSpoofData.month)[1]
+        timeSpoofData.day = max(1, min(numDaysInMonth, timeSpoofData.day))
         timeSpoofData.hour = max(0, min(23, timeSpoofData.hour))
         timeSpoofData.minute = max(0, min(59, timeSpoofData.minute))
 
         # Use the actual current year and month with a spoofed day, hour, and minute
-        realNow = datetime.now()
         timeSpoofData.spoofedStartupTs = datetime(year = realNow.year, month = timeSpoofData.month,
             day = timeSpoofData.day, hour = timeSpoofData.hour, minute = timeSpoofData.minute)
 
@@ -174,20 +175,26 @@ init -10 python:
     timeInference.secSinceOriginalVisit = tdFromOriginal.total_seconds()
     timeInference.secSinceLastVisit = tdFromLast.total_seconds()
 
-    # Check for backwards time travel
-    if (not timeSpoofData is None) and timeSpoofData.USE_TIMESPOOFING and timeInference.secSinceLastVisit < -1:
-        renpy.error("ERROR: detected a negative time delta, meaning that the spoofed timestamp is earlier than the last timestamp. "
-            + "This is invalid; either move the spoofed timestamp forward, or clear persistent data to create a new starting timestamp")
-
-    print("Last lastVisitTimestamp =", persistent.lastVisitTimestamp)
-    persistent.lastVisitTimestamp = now
-    print("now =", now)
-    print("Current Time =", now.strftime("%H:%M:%S"))
-    print("Time since first launch =", timeInference.secSinceOriginalVisit)
-    print("Time since last launch =", timeInference.secSinceLastVisit)
+    # Check for backwards time travel, which could put us in a bad state
+    if timeInference.secSinceLastVisit < -1:
+        timeInference.hasDoneBackwardsTimeTravel = True
+    else:
+        timeInference.hasDoneBackwardsTimeTravel = False
+        print("Last lastVisitTimestamp =", persistent.lastVisitTimestamp)
+        persistent.lastVisitTimestamp = now
+        print("now =", now)
+        print("Current Time =", now.strftime("%H:%M:%S"))
+        print("Time since first launch =", timeInference.secSinceOriginalVisit)
+        print("Time since last launch =", timeInference.secSinceLastVisit)
 
 
 ## Flow control overrides:
 # Skip the main menu that Ren'Py normally shows and jump straight to the creature's greeting
 label main_menu:
+    # If the user has accidentally done backwards time travel, show an error message and quit
+    if timeInference.hasDoneBackwardsTimeTravel:
+        $ minuteDelta = timeInference.secSinceLastVisit / 60 
+        "ERROR: detected a negative time delta of [minuteDelta] minutes, meaning that you have 'traveled back in time' through time spoofing."
+        "This is invalid; either move your spoofed timestamp forward, or clear persistent data to create a new starting timestamp"
+        $ renpy.quit()
     return
