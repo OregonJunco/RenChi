@@ -8,9 +8,10 @@
 #    - String helpers for appointments
 # X "Fake timestamp" functionality
 # X Permanent progress example
-# - Backwards time travel warning / error
-# - Day # functionality
-# - "Days known" gates
+# X Backwards time travel warning / error
+# X Day # functionality
+# - Make time travel warning less horrible
+# X "Days known" gates
 # - Mumble sounds
 
 

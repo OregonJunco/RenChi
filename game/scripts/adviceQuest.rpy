@@ -27,7 +27,11 @@ init python:
         # Return a menu option appropriate to the current progress in the advice "quest"
         if persistent.adviceQuestMilestone == adviceMilestoneFirstDate:
             return "How did your first date go??"
-        elif persistent.adviceQuestMilestone == adviceMilestoneSecondDate:
+        # To spread content out, second date and proposal update will only show after the 1st companionship day, 
+        #  even if the "appointment" is ready so that the player can't speedrun the whole sequence in 3 hour increments
+        if timeInference.getCompanionshipPeriodDay() < 2:
+            return None
+        if persistent.adviceQuestMilestone == adviceMilestoneSecondDate:
             return "How did your second date go??"
         elif persistent.adviceQuestMilestone == adviceMilestoneMarriage:
             return "So...... what did they say?"
