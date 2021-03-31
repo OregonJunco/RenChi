@@ -39,11 +39,11 @@ init -20 python:
             #  to disk as a value tuple
             # If there's an existing appointment data with my name, update it with my timestamp and save
             for i in range(len(persistent.storedAppointments)):
-                if (persistent.storedAppointments[i][0] == self.appointmentName):
+                if (persistent.storedAppointments[i][0] == self.name):
                     persistent.storedAppointments[i][1] = self.timestamp
                     return
             # Otherwise, add a new appointment data
-            persistent.storedAppointments.append((self.name, self.timestamp))
+            persistent.storedAppointments.append([self.name, self.timestamp])
         
         ## Delete this appointment from the list of scheduled appointments
         def unschedule(self):
@@ -76,11 +76,11 @@ init -20 python:
 
         ## Return the number of hours since the first visit
         def getHoursSinceFirstVisit(self):
-            return ((dt - persistent.originalVisitTimestamp).total_hours)
+            return ((self.getCurrentDateTime() - persistent.originalVisitTimestamp).total_seconds() / (60 * 60))
 
         ## Return the number of days since the first visit
         def getDaysSinceFirstVisit(self):
-            return ((dt - persistent.originalVisitTimestamp).days)
+            return ((self.getCurrentDateTime() - persistent.originalVisitTimestamp).days)
         
         ## Return the time of day as a readable string. Possible values: Morning, Afternoon, Evening, Night
         def getTimeOfDay(self):
